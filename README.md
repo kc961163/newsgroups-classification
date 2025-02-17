@@ -1,4 +1,4 @@
-# Machine Learning Assignment: 20 Newsgroups Classification
+# Machine Learning Project: Newsgroups Classification using different models
 
 ## Introduction
 
