@@ -409,18 +409,6 @@ We want to classify **20 Newsgroups** documents—available only as `(doc_id, wo
 
 #### 3.4 Key Results & Observations
 
-**Final Test Accuracy**: **~72%**
-
-1. **Training/Validation Performance**:
-  - The model quickly learns to classify many documents, with high training accuracy.
-  - Although the validation accuracy is lower during training, the final test accuracy stabilizes around **71–72%**.
-
-  Below is a **refined** way to present the **output** for **Section 3.4** in your README. By placing logs and metrics in **code blocks** and adding minimal explanatory text, you’ll provide a **clear** and **visually appealing** overview of your CNN’s results.
-
----
-
-#### 3.4 Key Results & Observations
-
 #### Training/Validation Performance
 - **Rapid Learning**: The model quickly learns to classify documents, achieving high training accuracy.
 - **Validation Plateau**: Although validation accuracy remains low during training, the final test accuracy stabilizes around **71–72%**.
@@ -528,6 +516,7 @@ Overall, this CNN approach demonstrates that sequence-based learning can effecti
 - **Models Implemented:**  
   - **Naive Bayes:** A generative model that uses word counts and strong independence assumptions.  
   - **Logistic Regression:** A discriminative model that directly models the probability of a label given the input features.
+  - **Convolutional Neural Network:** A deep learning model that learns local n-gram features from tokenized text sequences.
 
 - **Evaluation:**  
   Both models are evaluated using a classification report detailing performance metrics for each newsgroup class.
