@@ -2,7 +2,7 @@
 
 ## Introduction
 
-*This project focuses on classifying newsgroup posts using two types of models: a generative model (Naive Bayes) and a discriminative model (Logistic Regression). We use the 20 Newsgroups dataset to train, evaluate, and compare the performance of these models.*
+*This project focuses on classifying newsgroup posts using two types of models: a generative model (Naive Bayes) and a discriminative model (Logistic Regression and Convoluted Neural Network). We use the 20 Newsgroups dataset to train, evaluate, and compare the performance of these models.*
 
 ## How to Download the Data
 
@@ -115,23 +115,29 @@ The dataset is organized into six primary files (or bundles) that provide a nume
 
 4. **Run the Code**
 
-  The project is divided into different parts, each handling a specific data-loading pipeline. To run the models, execute the following commands:
+    The project is divided into different parts, each handling a specific data-loading pipeline. To run the models, execute the following commands:
 
-  **For TF-IDF Reconstruction:**
-  ```bash
-  python3 naives_LR.py --method text
-  ```
+    **For TF-IDF Reconstruction:**
+    ```bash
+    python3 naives_LR.py --method text
+    ```
 
-  **For Direct CSR Matrix Loading:**
-  ```bash
-  python3 naives_LR.py --method csr
-  ```
+    **For Direct CSR Matrix Loading:**
+    ```bash
+    python3 naives_LR.py --method csr
+    ```
 
-  The `--method` flag selects the data-loading approach:
-  - The **text** method reconstructs documents from the numeric data and applies TF-IDF transformation.
-  - The **csr** method directly loads the data into CSR matrices.
+    The `--method` flag selects the data-loading approach:
+    - The **text** method reconstructs documents from the numeric data and applies TF-IDF transformation.
+    - The **csr** method directly loads the data into CSR matrices.
 
-  Running these scripts will parse the dataset files, create sparse document-term matrices, train both the Naive Bayes and Logistic Regression models, and output detailed classification reports with metrics like precision, recall, F1-score, and support.
+    To run the CNN model, execute the following command:
+    ```bash
+    python3 cnn_classifier.py
+    ```
+    This script trains a Convolutional Neural Network on the 20 Newsgroups dataset using the reconstructed text data.
+
+    Running these scripts will parse the dataset files, create sparse document-term matrices, train both the Naive Bayes and Logistic Regression models, and output detailed classification reports with metrics like precision, recall, F1-score, and support.
 
 ## Experimental Setup and Results
 
@@ -331,7 +337,7 @@ comp.sys.ibm.pc.hardware       0.63      0.67      0.65       392
 - Direct raw counts provide a simpler and memory-efficient pipeline.
 - The CSR approach underperforms compared to the TF-IDF method, particularly for Logistic Regression which benefits from feature weighting.
 
-### Key Differences & Overall Observations
+#### Key Differences & Overall Observations
 
 **Accuracy:**  
 - TF-IDF Pipeline: Approximately 80% accuracy for both Naive Bayes and Logistic Regression.  
@@ -344,9 +350,99 @@ comp.sys.ibm.pc.hardware       0.63      0.67      0.65       392
 - The CSR method is straightforward and more memory-efficient, making it preferable for very large datasets.  
 - Text reconstruction with TF-IDF is a more traditional approach that offers higher accuracy, albeit with increased computational cost.
 
-### Conclusion
+**Conclusion**:
 
 Both Naive Bayes and Logistic Regression perform well on the 20 Newsgroups dataset. The text reconstruction combined with TF-IDF yields about 80% accuracy for both models, demonstrating the effectiveness of TF-IDF weighting in improving text classification. In contrast, the direct CSR approach using raw counts is simpler and more efficient in memory usage but provides lower accuracy, especially for Logistic Regression.
+
+### Method 3. Problem & Approach for CNN
+
+We want to classify **20 Newsgroups** documents—available only as `(doc_id, word_id, count)` files—into one of **20** categories. Since a standard CNN for text typically needs **token sequences**, we:
+
+1. **Reconstruct** approximate text from `(doc_id, word_id, count)` by repeating each vocabulary word by its count.
+2. **Preprocess** the resulting text (convert to lowercase, remove punctuation/numbers, filter out stopwords).
+3. **Tokenize** into integer sequences and **pad** each document to a fixed length.
+4. **Train a CNN** with an **embedding** layer, **Conv1D**, and **GlobalMaxPooling1D** to learn local n-gram features.
+5. **Evaluate** on the test set to produce classification metrics (accuracy, precision, recall, F1-score).
+
+**Why this method**:
+- A CNN with an embedding layer captures local word patterns effectively.
+- Reconstructing text enables typical text-based preprocessing rather than relying solely on bag-of-words counts.
+
+---
+
+### Code Summary
+
+#### 3.1 Data Preparation
+
+1. **Load Vocabulary & Labels**:  
+  - Read `vocabulary.txt`, `train.map` (for mapping label IDs to newsgroup names), and the `train`/`test.label` files.
+
+2. **Reconstruct Text**:  
+  - For each document, gather `(word_id, count)` pairs and form a “pseudo-document” by repeating `vocabulary[word_id]` `count` times.
+
+3. **Preprocessing**:  
+  - Convert the text to lowercase, remove punctuation, split on whitespace, and filter out stopwords.
+
+4. **Tokenize & Pad**:  
+  - Utilize a Keras `Tokenizer` to convert tokens into integer sequences, then apply `pad_sequences` to ensure a uniform sequence length (e.g., 400 tokens per document).
+
+#### 3.2 CNN Model
+
+1. **Embedding Layer**:  
+  - Transforms token IDs into 100-dimensional vectors.
+
+2. **Conv1D Layer**:  
+  - Applies 128 filters with a kernel size of 5 to detect local n-gram patterns.
+
+3. **GlobalMaxPooling1D**:  
+  - Aggregates the most salient feature for each filter across the sequence.
+
+4. **Dense Layers with Dropout**:  
+  - Used for the final classification into 20 newsgroups.
+
+5. **Training**:  
+  - The model is trained using the `Adam` optimizer and `sparse_categorical_crossentropy` loss for 5 epochs with a batch size of 64.
+
+#### 3.3 Evaluation
+
+- The model is evaluated on the test set (7,505 documents) by reporting overall test accuracy and a detailed classification report (precision, recall, and F1-score per class).
+
+#### 3.4 Key Results & Observations
+
+**Final Test Accuracy**: **~72%**
+
+1. **Training/Validation Performance**:
+  - The model quickly learns to classify many documents, with high training accuracy.
+  - Although the validation accuracy is lower during training, the final test accuracy stabilizes around **71–72%**.
+
+2. **Classification Report**:
+  - Some categories (e.g., `rec.sport.hockey`, `rec.motorcycles`) achieve **90%+** precision and recall.
+  - Other classes (e.g., `talk.religion.misc`, `talk.politics.misc`) sometimes get 0 predictions, leading to 0.0 F1-scores, which shows these classes are hard to distinguish.
+
+3. **Challenges in Prediction**:
+  - Overlapping vocabulary across categories.
+  - Lower document counts in certain classes.
+  - Loss of original word order during reconstruction may reduce context accuracy.
+
+4. **Interpretation**:
+  - A ~72% test accuracy is respectable given the approximate nature of the text reconstruction.
+  - The CNN’s embedding and convolutional layers effectively capture local patterns, though some newsgroups remain challenging to classify.
+
+---
+
+#### 3.5 Conclusion & Future Directions
+
+**Conclusion**:
+- A sequence-based CNN using an embedding layer and Conv1D over tokenized documents achieves approximately **72% test accuracy** on the 20 Newsgroups dataset, even with only approximate text reconstruction.
+- Most newsgroups are classified accurately, though some classes are not well-predicted.
+
+**Potential Improvements**:
+- Enhance text reconstruction or use the original text to better preserve word order.
+- Apply class weighting to improve predictions for underrepresented categories.
+- Perform further hyperparameter tuning (e.g., try different kernel sizes, extend training epochs, incorporate pre-trained embeddings).
+- Limit vocabulary size or employ subword tokenization to reduce overfitting.
+
+Overall, this CNN approach demonstrates that sequence-based learning can effectively capture local textual patterns and can outperform traditional bag-of-words models even with partially reconstructed text.
 
 ## Summary
 
@@ -359,7 +455,3 @@ Both Naive Bayes and Logistic Regression perform well on the 20 Newsgroups datas
 
 - **Evaluation:**  
   Both models are evaluated using a classification report detailing performance metrics for each newsgroup class.
-
-
-
-
