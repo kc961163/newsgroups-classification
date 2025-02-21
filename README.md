@@ -368,8 +368,6 @@ We want to classify **20 Newsgroups** documents—available only as `(doc_id, wo
 - A CNN with an embedding layer captures local word patterns effectively.
 - Reconstructing text enables typical text-based preprocessing rather than relying solely on bag-of-words counts.
 
----
-
 ### Code Summary
 
 #### 3.1 Data Preparation
@@ -492,7 +490,6 @@ comp.sys.ibm.pc.hardware       0.59      0.74      0.66       392
 > - Sports categories (e.g., `rec.sport.hockey`, `rec.motorcycles`) show high precision and recall.
 > - Overall test accuracy is approximately **72%**.
 
----
 
 #### 3.5 Conclusion & Future Directions
 
@@ -515,8 +512,30 @@ Overall, this CNN approach demonstrates that sequence-based learning can effecti
 
 - **Models Implemented:**  
   - **Naive Bayes:** A generative model that uses word counts and strong independence assumptions.  
-  - **Logistic Regression:** A discriminative model that directly models the probability of a label given the input features.
+  - **Logistic Regression:** A discriminative model that directly models the probability of a label given the input features.  
   - **Convolutional Neural Network:** A deep learning model that learns local n-gram features from tokenized text sequences.
 
 - **Evaluation:**  
   Both models are evaluated using a classification report detailing performance metrics for each newsgroup class.
+
+### Comparison & Key Insights
+
+- **Overall Accuracy:**  
+  - Naive Bayes & Logistic Regression both peak around 80% with TF-IDF.  
+  - CNN sits around 72% with partially reconstructed text. True raw text might yield higher CNN performance.
+
+- **Implementation Complexity:**  
+  - NB and LR (with CSR or TF-IDF) are straightforward, requiring less data preprocessing.  
+  - CNN needs a full text reconstruction → tokenization → embedding pipeline, which is more complex.
+
+- **Memory & Computation:**  
+  - TF-IDF or raw count matrices can be large but remain feasible in a sparse format for NB/LR.  
+  - CNN involves large embedding matrices (millions of parameters) and heavier GPU/CPU usage during training.
+
+- **Best-Performing Model:**  
+  - TF-IDF combined with Logistic Regression or Naive Bayes emerges as the top performer on this dataset.  
+  - The CNN’s sequence approach shows promise (especially on distinct categories) but is currently outperformed by well-tuned classical models.
+
+- **Future Directions:**  
+  - If original raw text is available, a CNN or other deep learning model might outperform classical methods by capturing richer context.  
+  - Additional hyperparameter tuning, class weighting, or pre-trained embeddings could help CNN results approach or surpass 80%.
