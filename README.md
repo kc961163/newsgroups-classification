@@ -415,18 +415,94 @@ We want to classify **20 Newsgroups** documents—available only as `(doc_id, wo
   - The model quickly learns to classify many documents, with high training accuracy.
   - Although the validation accuracy is lower during training, the final test accuracy stabilizes around **71–72%**.
 
-2. **Classification Report**:
-  - Some categories (e.g., `rec.sport.hockey`, `rec.motorcycles`) achieve **90%+** precision and recall.
-  - Other classes (e.g., `talk.religion.misc`, `talk.politics.misc`) sometimes get 0 predictions, leading to 0.0 F1-scores, which shows these classes are hard to distinguish.
+  Below is a **refined** way to present the **output** for **Section 3.4** in your README. By placing logs and metrics in **code blocks** and adding minimal explanatory text, you’ll provide a **clear** and **visually appealing** overview of your CNN’s results.
 
-3. **Challenges in Prediction**:
-  - Overlapping vocabulary across categories.
-  - Lower document counts in certain classes.
-  - Loss of original word order during reconstruction may reduce context accuracy.
+---
 
-4. **Interpretation**:
-  - A ~72% test accuracy is respectable given the approximate nature of the text reconstruction.
-  - The CNN’s embedding and convolutional layers effectively capture local patterns, though some newsgroups remain challenging to classify.
+#### 3.4 Key Results & Observations
+
+#### Training/Validation Performance
+- **Rapid Learning**: The model quickly learns to classify documents, achieving high training accuracy.
+- **Validation Plateau**: Although validation accuracy remains low during training, the final test accuracy stabilizes around **71–72%**.
+
+#### Output Logs
+
+```bash
+week 5/cnn_classifier.py
+[nltk_data] Downloading package stopwords...
+[nltk_data]   Unzipping corpora/stopwords.zip.
+[INFO] Loaded vocabulary. Size = 61188
+[INFO] Newsgroups: ['alt.atheism', 'comp.graphics', 'comp.os.ms-windows.misc', ... 'talk.religion.misc']
+[INFO] Number of training documents = 11269
+[INFO] Number of test documents = 7505
+[DEBUG] First training doc (partial): archive archive archive archive name name atheism atheism ...
+[DEBUG] Sample tokens from train doc 0: ['archive', 'archive', 'archive', 'archive', 'name', 'name', ...]
+[INFO] Train sequence shape = (11269, 400)
+[INFO] Test sequence shape  = (7505, 400)
+Model: "sequential"
+_________________________________________________________________
+ Layer (type)                Output Shape              Param #
+=================================================================
+ embedding (Embedding)       (None, 400, 100)          5383200
+ conv1d (Conv1D)             (None, 396, 128)          64128
+ global_max_pooling1d (GlobalMaxPooling1D) (None, 128)   0
+ dropout (Dropout)           (None, 128)               0
+ dense (Dense)               (None, 64)                8256
+ dense_1 (Dense)             (None, 20)                1300
+=================================================================
+Total params: 5,456,884
+Trainable params: 5,456,884
+Non-trainable params: 0
+_________________________________________________________________
+Epoch 1/5
+159/159 [==============================] - 9s 53ms/step - loss: 2.7908 - accuracy: 0.1501 - val_loss: 6.7499 - val_accuracy: 0.0000e+00
+Epoch 2/5
+159/159 [==============================] - 9s 54ms/step - loss: 1.4529 - accuracy: 0.6122 - val_loss: 10.7681 - val_accuracy: 0.1775
+Epoch 3/5
+159/159 [==============================] - 9s 54ms/step - loss: 0.6359 - accuracy: 0.8340 - val_loss: 14.0124 - val_accuracy: 0.1846
+Epoch 4/5
+159/159 [==============================] - 9s 56ms/step - loss: 0.3130 - accuracy: 0.9254 - val_loss: 16.1429 - val_accuracy: 0.1979
+Epoch 5/5
+159/159 [==============================] - 8s 53ms/step - loss: 0.1831 - accuracy: 0.9562 - val_loss: 18.1414 - val_accuracy: 0.1988
+[RESULT] CNN Test Accuracy: 0.7190
+```
+
+#### Classification Report
+
+```bash
+CNN Classification Report:
+              precision    recall  f1-score   support
+
+       alt.atheism       0.63      0.69      0.66       318
+       comp.graphics       0.64      0.70      0.67       389
+ comp.os.ms-windows.misc       0.70      0.66      0.68       391
+comp.sys.ibm.pc.hardware       0.59      0.74      0.66       392
+   comp.sys.mac.hardware       0.80      0.78      0.79       383
+      comp.windows.x       0.79      0.69      0.74       390
+      misc.forsale       0.71      0.72      0.72       382
+         rec.autos       0.73      0.79      0.76       395
+     rec.motorcycles       0.88      0.91      0.89       397
+    rec.sport.baseball       0.88      0.90      0.89       397
+    rec.sport.hockey       0.93      0.93      0.93       399
+         sci.crypt       0.83      0.86      0.84       395
+     sci.electronics       0.53      0.61      0.57       393
+         sci.med       0.71      0.72      0.71       393
+         sci.space       0.83      0.82      0.82       392
+  soc.religion.christian       0.59      0.87      0.70       398
+    talk.politics.guns       0.55      0.86      0.67       364
+   talk.politics.mideast       0.86      0.70      0.77       376
+    talk.politics.misc       0.00      0.00      0.00       310
+    talk.religion.misc       0.00      0.00      0.00       251
+
+        accuracy                           0.72      7505
+         macro avg       0.66      0.70      0.67      7505
+      weighted avg       0.68      0.72      0.69      7505
+```
+
+> **Notes**:
+> - Categories such as `talk.politics.misc` and `talk.religion.misc` have **0 predicted samples**, resulting in 0.0 F1-scores.
+> - Sports categories (e.g., `rec.sport.hockey`, `rec.motorcycles`) show high precision and recall.
+> - Overall test accuracy is approximately **72%**.
 
 ---
 
